@@ -51,4 +51,5 @@ ignore = [
 [project.entry-points.'nerfstudio.method_configs']
 water_splatting = "water_splatting.water_splatting_config:water_splatting_method"
 water_splatting_big = "water_splatting.water_splatting_config:water_splatting_method_big"
+wild_water_splatting = "water_splatting.wild_water_splatting_config:wild_water_splatting_method"
 # export NERFSTUDIO_METHOD_CONFIGS="water-splatting=water_splatting.water_splatting_config:water_splatting_method"
