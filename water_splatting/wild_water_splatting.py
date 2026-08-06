@@ -215,6 +215,8 @@ class WildWaterSplattingModelConfig(ModelConfig):
     "Conv threshold the occluder mask"
     conv_mask_fix_rand: bool = False
     "Conv threshold the occluder mask and randomize non solid parts"
+    target_mask_loss: bool = False
+    "Add target value for mask in loss"
     features_mask_iters: int = 2500
     "Iteration to start training occluder mask"
     init_mask_train_iters: int = 2000
@@ -1193,6 +1195,7 @@ class WildWaterSplattingModel(Model):
                 self.features_mask=out_gen["mask"]
                 if self.config.curr_iter >= self.config.features_mask_iters:
                     occ_mask_og = self.features_mask
+                    print("OG Mask Shape: ", occ_mask_og.shape)
                     occ_mask_inter = torch.nn.functional.interpolate(occ_mask_og,size=(map_gt_img.shape[-2:]))
                     occ_mask = occ_mask_inter.squeeze(0).permute(1,2,0)
                     print("Occ Mask Shape: ", occ_mask.shape)
@@ -1249,16 +1252,29 @@ class WildWaterSplattingModel(Model):
             simloss = 1 - self.ssim(gt_img.permute(2, 0, 1)[None, ...], pred_img.permute(2, 0, 1)[None, ...])
         # Occluder Mask
         if self.config.use_features_mask and self.config.curr_iter >= self.config.features_mask_iters and self.updating_mask:
-            # mask_loss = (torch.square(1-self.features_mask)).mean() * self.config.features_mask_loss_coef
-            mask_loss = (torch.square(1-occ_mask)).mean() * self.config.features_mask_loss_coef
+            if self.config.conv_mask_fix:
+                mask_loss = (torch.square(1-occ_mask)).mean() * self.config.features_mask_loss_coef
+            elif self.config.target_mask_loss:
+                ### Target loss
+                target_keep = 0.9
+                print("Mean Mask Value: ", self.features_mask.mean())
+                mask_loss = (torch.square(self.features_mask - target_keep)).mean() * self.config.features_mask_loss_coef
+            else:
+                mask_loss = (torch.square(1-self.features_mask)).mean() * self.config.features_mask_loss_coef
             if self.config.use_mask_smooth_loss:
                 smooth_mask_loss = self.get_smooth_loss(gt_img.permute(2,0,1).unsqueeze(0), torch.nn.functional.interpolate(self.features_mask,size=(gt_img.shape[:-1])))
                 print("Mask OG Loss:", mask_loss, " --  Smooth Loss: ", smooth_mask_loss * self.config.smooth_mask_loss_coef)
                 mask_loss += smooth_mask_loss * self.config.smooth_mask_loss_coef
             if self.config.use_tv_mask_loss:
                 tv_mask_loss = self.get_tv_loss(self.features_mask.squeeze(0))
-                print("Mask OG Loss:", mask_loss, " --  TV Loss: ", tv_mask_loss * self.config.tv_loss_coef)
-                mask_loss += tv_mask_loss * self.config.tv_loss_coef
+                # tv_weight = ((recon_loss.detach() + 1e-6)/ (tv_mask_loss.detach() + 1e-6))
+                # print("TV Weight: ", tv_weight.item(), "TV OG Loss: ", tv_mask_loss.item())
+                # print("Mask OG Loss:", mask_loss, " --  TV Loss: ", tv_mask_loss * tv_weight * self.config.tv_loss_coef)
+                # mask_loss += tv_mask_loss * tv_weight * self.config.tv_loss_coef
+
+                mask_mean = self.features_mask.mean()
+                mask_loss += ((tv_mask_loss / (mask_mean + 1e-6)) * self.config.tv_loss_coef + 0.0 * (torch.square(occ_mask)).mean()) 
+                print("Mask Mean:", mask_mean, " --  TV Loss: ", tv_mask_loss)
         else:
             mask_loss = torch.tensor(0.0, device=gt_img.device)
 

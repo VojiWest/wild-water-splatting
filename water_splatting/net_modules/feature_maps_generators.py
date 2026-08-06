@@ -148,6 +148,14 @@ class Unet_model(nn.Module):
                 nn.Sigmoid()
             )
 
+            # # For less upscaling
+            # self.mask_decoder = nn.Sequential(
+            #     PixelShuffleBlock(512, 256),
+            #     OneConv(256,256),
+            #     nn.Conv2d(256,1,kernel_size=1),
+            #     nn.Sigmoid()
+            # )
+
     
     def forward(self, inx,only_gloabal_features=False,eval_mode=False):
         out={}
