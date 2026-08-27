@@ -6,7 +6,7 @@
 <br>
 
 <p align="center">
-  <img alt="WildWaterSplatting Reconstruction in Highly Dynamic Environment" src="./wws_splitscreen.gif" />
+  <img alt="WildWaterSplatting Reconstruction in Highly Dynamic Environment" src="./water_splatting/wws_splitscreen.gif" />
 </p>
 
 <p align="justify">
