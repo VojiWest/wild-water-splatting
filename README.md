@@ -6,7 +6,7 @@
 <br>
 
 <p align="center">
-  <img alt="WaterSplatting Reconstruction" src="./wws_splitscreen.gif" />
+  <img alt="WildWaterSplatting Reconstruction in Highly Dynamic Environment" src="./wws_splitscreen.gif" />
 </p>
 
 <p align="justify">
@@ -46,78 +46,39 @@ pip install nerfstudio==1.1.4
 ns-install-cli
 
 # WaterSplatting
-git clone git@github.com:water-splatting/water-splatting.git
+git clone git@github.com:VojiWest/wild-water-splatting.git
 cd water-splatting
 git submodule init
 git submodule update --recursive
 pip install --no-use-pep517 -e .
 ```
 
-## Data Preprocessing
-To keep consistency across different models, we recomputed the camera intrinsic/extrinsic parameters and performed distortion corrections using [COLMAP](https://github.com/colmap/colmap)'s `image_undistorter` on [SeaThru-NeRF](https://sea-thru-nerf.github.io/) dataset:
-```bash
-colmap image_undistorter \
-  --image_path /your_path_to_dataset/SeathruNeRF_dataset/IUI3-RedSea/images_wb \
-  --input_path /your_path_to_dataset/SeathruNeRF_dataset/IUI3-RedSea/colmap/sparse/0 \
-  --output_path /your_path_to_dataset/undistorted_seathrunerf_dataset/IUI3-RedSea \
-  --output_type COLMAP
-```
-
 ## Training
-To start the training on the undistorted SeaThru-NeRF dataset, run the following commands:
+To start the training run the following commands:
 ```bash
-cd /your_path_to_repo/water-splatting
-ns-train water-splatting --vis viewer+wandb colmap --downscale-factor 1 --colmap-path sparse --data /your_path_to_dataset/undistorted_seathrunerf_dataset/IUI3-RedSea --images-path images
+cd /your_path_to_repo/wild-water-splatting
+ns-train wild-water-splatting --vis viewer+wandb colmap --downscale-factor 1 --colmap-path sparse --data /your_path_to_dataset --images-path images
 ```
 
-Or, to start the training on the original [SeaThru-NeRF](https://sea-thru-nerf.github.io/) dataset, run the following commands:
-```bash
-cd /your_path_to_repo/water-splatting
-ns-train water-splatting --vis viewer+wandb colmap --downscale-factor 1 --colmap-path sparse/0 --data /your_path_to_dataset/SeathruNeRF_dataset/IUI3-RedSea --images-path Images_wb
-```
-Please note that: The training and testing splits reported in our paper are different from the default splits in nerfstudio, and are consistent with the splits used in the SeaThru-NeRF paper.
+### Additional Arguments
+
+In addition to the arguments provided by the original [WaterSplatting](https://github.com/water-splatting/water-splatting) implementation, WildWaterSplatting introduces the following arguments for occluder masking:
+
+| Argument | Default | Description |
+|---|---:|---|
+| `use_features_mask` | `True` | Enables the occluder masking model when set to `True`. |
+| `map_generator_type` | `"unet"` | Specifies the masking model architecture. Currently, only a U-Net is implemented. |
+| `features_mask_loss_coef` | `0.75` | Weight applied to the occluder mask loss. A value of `0.75` was found to provide the best results in our experiments. |
+| `features_mask_iters` | `2500` | Number of initial iterations during which only the Gaussian Splatting model and IFM MLP are trained, without the U-Net masking model. |
+| `init_mask_train_iters` | `2000` | Number of iterations for which only the occluder masking model is trained after `features_mask_iters`. |
+| `seperated_learning` | `True` | When set to `True`, the occluder masking model and WaterSplatting model are updated separately during training. |
+
+ 
 
 ## Evaluation
 
 ```bash
-cd /your_path_to_repo/water-splatting
+cd /your_path_to_repo/wild-water-splatting
 ns-eval --load-config outputs/unnamed/water-splatting/your_timestamp/config.yml --render-output-path renders/eval
 ```
 
-## Interactive viewer
-To start the viewer and explore the trained models, run one of the following:
-```bash
-ns-viewer --load-config outputs/unnamed/water-splatting/your_timestamp/config.yml
-```
-
-## Rendering videos
-To render a video on a trajectory (e.g., generated from the interactive viewer), run:
-```bash
-ns-render camera-path --load-config outputs/unnamed/water-splatting/your_timestamp/config.yml --camera-path-filename /your_path_to_dataset/SeathruNeRF_dataset/IUI3-RedSea/camera_paths/your_trajectory.json --output-path renders/IUI3-RedSea/water_splatting.mp4
-```
-
-Please note that the default output quality is lossy.
-
-## Rendering dataset
-To render testing set for a checkpoint, run:
-```bash
-ns-render dataset --load-config outputs/unnamed/water-splatting/your_timestamp/config.yml --data /your_path_to_dataset/SeathruNeRF_dataset/IUI3-RedSea
-```
-Please note that the default output quality is lossy.
-</p>
-</section>
-
-## Acknowledgements
-This work was supported by the Czech Science Foundation (GACR) EXPRO (grant no. 23-07973X), and by the Ministry of Education, Youth and Sports of the Czech Republic through the e-INFRA CZ (ID:90254).
-Jonas Kulhanek acknowledges travel support from the European Union’s Horizon 2020 research and innovation programme under ELISE (grant no. 951847).
-
-## Citation
-If you find our code or paper useful, please cite:
-```bibtex
-@article{li2025watersplatting,
-  title={{W}ater{S}platting: Fast Underwater {3D} Scene Reconstruction using Gaussian Splatting},
-  author={Li, Huapeng and Song, Wenxuan and Xu, Tianao and Elsig, Alexandre and Kulhanek, Jonas},
-  journal={3DV},
-  year={2025}
-}
-```
