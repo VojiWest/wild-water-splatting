@@ -1,48 +1,30 @@
-<p align="center">
-    <h1>
-        <span class="title-main"><span>WaterSplatting</span></span>
-        <span class="title-small">Fast Underwater 3D Scene Reconstruction Using Gaussian Splatting</span>
-      </h1>
-  <p align="center">
-    <a href="https://github.com/IronLu11">Huapeng Li</a>
-    ·
-    <a href="https://www.linkedin.com/in/wenxuan-song-901123188/">Wenxuan Song</a>
-    ·
-    <a href="https://www.linkedin.com/in/tianao-xu-066b51258/">Tianao Xu</a>
-    ·
-    <a href="https://www.linkedin.com/in/alexandre-elsig-516642116/">Alexandre Elsig</a>
-    ·
-    <a href="https://jkulhanek.com/">Jonas Kulhanek</a>
-  </p><p align="center">
-    <b><i>3DV 2025</i></b>
-  </p>
-  <h3 align="center"><a href="https://arxiv.org/pdf/2408.08206">📄 Paper</a> | <a href="https://water-splatting.github.io/">🌐 Project Page</a></h3>
-  <div align="center"></div>
-</p>
-<br/>
+<h1 align="center">
+    <span class="title-main">WildWaterSplatting</span><br>
+    <span class="title-small">Occluder-Masking Underwater Gaussian Splatting</span>
+</h1>
+
+<br>
+
 <p align="center">
   <img alt="WaterSplatting Reconstruction" src=".assets/curasao.webp" />
 </p>
-    <p align="center" class="justify" style="font-size: 1rem;margin: 0 0 0.4rem 0; text-align-last: center">
-    <strong>WaterSplatting</strong> combines 3DGS with volume rendering to enable water/fog modeling</strong>
-    </p>
+
 <p align="justify">
-We introduce WaterSplatting, a novel approach that fuses volumetric rendering with 3DGS to handle underwater data effectively. 
-Our method employs 3DGS for explicit geometry representation and a separate volumetric field (queried once per pixel) for capturing the scattering medium. 
-This dual representation further allows the restoration of the scenes by removing the scattering medium. 
-Our method outperforms state-of-the-art NeRF-based methods in rendering quality on the underwater SeaThru-NeRF dataset. 
-Furthermore, it does so while offering real-time rendering performance.
+    This repository introduces WildWaterSplatting, a Gaussian Splatting method that combines underwater lighting dynamics modelling and occluder masking with an auxiliary model. WildWaterSplatting is built on top of WaterSplatting with the addition of a U-Net masking model from the method Gaussians in the Wild. Through this combination, WildWaterSplatting shows improved reconstruction of highly dynamic scenes containing large quantities of moving marine animals and marine snow.
 </p>
+
 <br>
 
 ## Installation
 
-Our method is based on [nerfstudio](https://docs.nerf.studio/index.html).
+This method is built on WaterSplatting; therefore, all setup instructions are the same. This repository is a fork of the original WaterSplatting repository:
+
+https://github.com/water-splatting/water-splatting
 
 ### Create environment
 ```bash
-conda create --name water_splatting -y python=3.8
-conda activate water_splatting
+conda create --name wild_water_splatting -y python=3.8
+conda activate wild_water_splatting
 python -m pip install --upgrade pip
 ```
 
