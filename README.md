@@ -28,7 +28,7 @@ conda activate wild_water_splatting
 python -m pip install --upgrade pip
 ```
 
-### Install WaterSplatting
+### Install WildWaterSplatting
 
 ```bash
 # Install PyTorch
