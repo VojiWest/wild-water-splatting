@@ -6,7 +6,7 @@
 <br>
 
 <p align="center">
-  <img alt="WaterSplatting Reconstruction" src=".assets/curasao.webp" />
+  <img alt="WaterSplatting Reconstruction" src="wws_splitscreen.gif" />
 </p>
 
 <p align="justify">
